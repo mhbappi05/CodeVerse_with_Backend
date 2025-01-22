@@ -45,6 +45,10 @@ include 'db.php';
             <h2>Why Choose CollabConnect?</h2>
             <div class="features-grid">
                 <div class="feature-card">
+                    <h3>Start a Discussion</h3>
+                    <p>Get expert answers to your programming queries.</p>
+                </div>
+                <div class="feature-card">
                     <h3>Ask Questions</h3>
                     <p>Get expert answers to your programming queries.</p>
                 </div>
