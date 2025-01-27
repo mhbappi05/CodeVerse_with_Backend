@@ -10,6 +10,7 @@ session_start();
     <title>CodeVerse</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/dropdown-menu.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
 <body>

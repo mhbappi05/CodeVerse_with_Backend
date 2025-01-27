@@ -2,37 +2,80 @@
 include 'db.php';
 session_start();
 
+// Debug logging
+error_log("Message sending attempt started");
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    error_log("No user session found");
+    echo json_encode(['status' => 'error', 'message' => 'Not logged in']);
+    exit;
+}
+
+// Validate input
 if (!isset($_POST['receiver_id']) || !isset($_POST['message'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Invalid input.']);
+    error_log("Missing required fields");
+    echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
     exit;
 }
 
-$sender_id = $_SESSION['user_id']; // Ensure this session variable is set
-$receiver_id = $_POST['receiver_id'];
-$message = trim($_POST['message']); // Trim to remove unnecessary whitespace
+$sender_id = $_SESSION['user_id'];
+$receiver_id = intval($_POST['receiver_id']);
+$message = trim($_POST['message']);
+$file_path = isset($_POST['file_path']) ? $_POST['file_path'] : null;
 
+// Log the values
+error_log("Sender ID: " . $sender_id);
+error_log("Receiver ID: " . $receiver_id);
+error_log("Message: " . $message);
+
+// Validate message
 if (empty($message)) {
-    echo json_encode(['status' => 'error', 'message' => 'Message cannot be empty.']);
+    error_log("Empty message");
+    echo json_encode(['status' => 'error', 'message' => 'Message cannot be empty']);
     exit;
 }
 
-// Insert the message into the database
-$query = "INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)";
-$stmt = $conn->prepare($query);
-
-if (!$stmt) {
-    echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $conn->error]);
+// Validate user IDs
+if ($sender_id <= 0 || $receiver_id <= 0) {
+    error_log("Invalid user IDs");
+    echo json_encode(['status' => 'error', 'message' => 'Invalid user IDs']);
     exit;
 }
 
-$stmt->bind_param("iis", $sender_id, $receiver_id, $message);
-
-if ($stmt->execute()) {
-    echo json_encode(['status' => 'success', 'message' => 'Message sent.']);
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'Message could not be sent: ' . $stmt->error]);
+try {
+    // Insert message
+    $query = "INSERT INTO messages (sender_id, receiver_id, message, file_path) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    
+    if (!$stmt) {
+        throw new Exception("Prepare failed: " . $conn->error);
+    }
+    
+    $stmt->bind_param("iiss", $sender_id, $receiver_id, $message, $file_path);
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Execute failed: " . $stmt->error);
+    }
+    
+    error_log("Message sent successfully");
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Message sent',
+        'debug' => [
+            'sender_id' => $sender_id,
+            'receiver_id' => $receiver_id,
+            'message_id' => $conn->insert_id
+        ]
+    ]);
+    
+} catch (Exception $e) {
+    error_log("Error sending message: " . $e->getMessage());
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+} finally {
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+    $conn->close();
 }
-
-$stmt->close();
-$conn->close();
 ?>

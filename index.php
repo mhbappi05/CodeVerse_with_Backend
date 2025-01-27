@@ -19,8 +19,6 @@ include 'db.php';
             <ul class="nav-links">
                 <li><a href="#">Home</a></li>
                 <li><a href="#features">Features</a></li>
-                <li><a href="#jobs">Jobs</a></li>
-                <li><a href="#forum">Discussion</a></li>
                 <li><a href="login.php">Login</a></li>
                 <li><a href="register.php">Register</a> </li>
             </ul>

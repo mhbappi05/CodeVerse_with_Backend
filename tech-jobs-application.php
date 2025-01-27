@@ -20,6 +20,39 @@ if ($job_id > 0) {
         die("Job not found.");
     }
 }
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $job_title = $_POST['job_title'];
+    $applicant_name = $_POST['applicant_name'];
+    $applicant_email = $_POST['applicant_email'];
+    $message = $_POST['message'];
+
+    // Handle file upload
+    $resume = $_FILES['resume'];
+    $resume_name = time() . '_' . $resume['name']; // Unique filename
+    $upload_dir = 'uploads/resumes/';
+    $upload_path = $upload_dir . $resume_name;
+
+    // Create directory if it doesn't exist
+    if (!file_exists($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
+
+    if (move_uploaded_file($resume['tmp_name'], $upload_path)) {
+        // Insert into database
+        $stmt = $conn->prepare("INSERT INTO job_applications (job_title, applicant_name, applicant_email, resume, message, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+        $stmt->bind_param('sssss', $job_title, $applicant_name, $applicant_email, $resume_name, $message);
+
+        if ($stmt->execute()) {
+            echo "<script>alert('Application submitted successfully!'); window.location.href='tech-jobs.php';</script>";
+        } else {
+            echo "<script>alert('Error submitting application. Please try again.');</script>";
+        }
+    } else {
+        echo "<script>alert('Error uploading resume. Please try again.');</script>";
+    }
+}
 ?>
 
 <!-- Header -->
