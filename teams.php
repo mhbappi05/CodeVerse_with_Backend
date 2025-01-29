@@ -66,11 +66,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Fetch all teams from the database
-$sql = "SELECT * FROM teams";
-$result = $conn->query($sql);
+$sql = "SELECT t.*, 
+        CASE WHEN tm.user_id IS NOT NULL THEN 1 ELSE 0 END as is_member 
+        FROM teams t 
+        LEFT JOIN team_members tm ON t.id = tm.team_id AND tm.user_id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result === false) {
-    die("Error fetching teams: " . $conn->error); // Handle potential query errors
+    die("Error fetching teams: " . $conn->error);
+}
+
+// Add handler for leaving team
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'leave') {
+    $team_id = $_POST['team_id'];
+    
+    // Delete the team member record
+    $delete_sql = "DELETE FROM team_members WHERE team_id = ? AND user_id = ?";
+    $delete_stmt = $conn->prepare($delete_sql);
+    $delete_stmt->bind_param("ii", $team_id, $user_id);
+    
+    if ($delete_stmt->execute()) {
+        // Update the members count
+        $update_sql = "UPDATE teams SET members_count = members_count - 1 WHERE id = ?";
+        $update_stmt = $conn->prepare($update_sql);
+        $update_stmt->bind_param("i", $team_id);
+        $update_stmt->execute();
+        
+        header("Location: teams.php");
+        exit;
+    }
 }
 ?>
 
@@ -96,11 +123,17 @@ if ($result === false) {
                 <h3><?= $team['name']; ?></h3>
                 <p><?= $team['description']; ?></p>
                 <span class="team-members">Members: <?= $team['members_count']; ?></span>
-                <!-- Pass team_id to join the team -->
-                <form action="teams.php" method="POST">
-                    <input type="hidden" name="team_id" value="<?= $team['id']; ?>">
-                    <button type="submit" class="btn-secondary">Join Team</button>
-                </form>
+                <?php if ($user_id): // Only show buttons if user is logged in ?>
+                    <form action="teams.php" method="POST">
+                        <input type="hidden" name="team_id" value="<?= $team['id']; ?>">
+                        <?php if ($team['is_member']): ?>
+                            <input type="hidden" name="action" value="leave">
+                            <button type="submit" class="btn-secondary">Leave Team</button>
+                        <?php else: ?>
+                            <button type="submit" class="btn-secondary">Join Team</button>
+                        <?php endif; ?>
+                    </form>
+                <?php endif; ?>
             </div>
         <?php endwhile; ?>
     </div>

@@ -149,40 +149,71 @@ $stmt->close();
         <!-- Saved Announcements -->
         <div class="tab-content" id="saved-tab">
             <h2>Saved Notes</h2>
-            <ul>
-                <?php foreach ($saved_items as $item): ?>
-                    <li><a href="view-announcement.php?id=<?= $item['id'] ?>"><?= htmlspecialchars($item['title']) ?></a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
+            <div class="content-grid">
+                <?php if (empty($saved_items)): ?>
+                    <p class="no-content">No saved notes found.</p>
+                <?php else: ?>
+                    <?php foreach ($saved_items as $item): ?>
+                        <div class="content-card" onclick="window.location.href='view-announcement.php?id=<?= $item['id'] ?>'">
+                            <h3><?= htmlspecialchars($item['title']) ?></h3>
+                            <p class="preview">
+                                <?= isset($item['content']) 
+                                    ? htmlspecialchars(substr($item['content'], 0, 100)) . '...'
+                                    : 'No content available' 
+                                ?>
+                            </p>
+                            <span class="date"><?= date('M d, Y', strtotime($item['created_at'])) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
 
         <!-- Teams -->
         <div class="tab-content" id="teams-tab" style="display: none;">
             <h2>Teams</h2>
-            <ul>
-                <?php foreach ($teams as $team): ?>
-                    <li><a href="view-team.php?id=<?= $team['id'] ?>"><?= htmlspecialchars($team['name']) ?></a></li>
-                <?php endforeach; ?>
-            </ul>
+            <div class="content-grid">
+                <?php if (empty($teams)): ?>
+                    <p class="no-content">No teams found.</p>
+                <?php else: ?>
+                    <?php foreach ($teams as $team): ?>
+                        <div class="content-card" onclick="window.location.href='view-team.php?id=<?= $team['id'] ?>'">
+                            <h3><?= htmlspecialchars($team['name']) ?></h3>
+                            <p class="preview"><?= htmlspecialchars($team['description'] ?? 'No description available') ?></p>
+                            <div class="team-meta">
+                                <span class="members">Members: <?= $team['member_count'] ?? '0' ?></span>
+                                <span class="role"><?= $team['created_by'] == $user_id ? 'Owner' : 'Member' ?></span>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
 
         <!-- Questions Tab -->
         <div class="tab-content" id="questions-tab" style="display: none;">
             <h2>Your Questions</h2>
-            <ul>
+            <div class="content-grid">
                 <?php if (empty($questions)): ?>
-                    <li>No questions found.</li>
+                    <p class="no-content">No questions found.</p>
                 <?php else: ?>
                     <?php foreach ($questions as $question): ?>
-                        <li>
-                            <a href="view-question.php?id=<?= $question['id'] ?>">
-                                <h3><?= htmlspecialchars($question['title']) ?></h3>
-                            </a>
-                        </li>
+                        <div class="content-card" onclick="window.location.href='view-question.php?id=<?= $question['id'] ?>'">
+                            <h3><?= htmlspecialchars($question['title']) ?></h3>
+                            <p class="preview">
+                                <?= isset($question['content']) 
+                                    ? htmlspecialchars(substr($question['content'], 0, 100)) . '...'
+                                    : 'No content available' 
+                                ?>
+                            </p>
+                            <div class="question-meta">
+                                <span class="date"><?= date('M d, Y', strtotime($question['created_at'])) ?></span>
+                                <span class="answers">Answers: <?= $question['answer_count'] ?? '0' ?></span>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
-            </ul>
+            </div>
         </div>
 
     </div>
@@ -211,5 +242,95 @@ $stmt->close();
         });
     });
 </script>
+
+<style>
+.profile-tabs {
+    margin: 2rem 0;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.pro-btn {
+    padding: 10px 20px;
+    margin-right: 10px;
+    border: none;
+    background: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    position: relative;
+}
+
+.pro-btn.active {
+    color: #007bff;
+}
+
+.pro-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #007bff;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.content-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.content-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.content-card h3 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.content-card .preview {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.content-card .date,
+.content-card .members,
+.content-card .role,
+.content-card .answers {
+    font-size: 0.8rem;
+    color: #888;
+    margin-right: 15px;
+}
+
+.team-meta,
+.question-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.no-content {
+    text-align: center;
+    color: #666;
+    grid-column: 1 / -1;
+    padding: 40px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+</style>
 
 <?php include 'templates/footer.php'; ?>

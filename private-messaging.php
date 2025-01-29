@@ -512,12 +512,19 @@ if (!isset($_SESSION['user_id'])) {
                         messageInput.value = '';
                         loadMessages(selectedReceiverId);
                     } else {
-                        alert('Error sending message: ' + data.message);
+                        console.error('Server error:', data.message);
+                        // Only show alert if there's actually an error message
+                        if (data.message) {
+                            alert('Error sending message: ' + data.message);
+                        }
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error sending message');
+                    // Only show alert for actual errors
+                    if (!messageInput.value.trim()) {
+                        alert('Error sending message');
+                    }
                 });
         }
 

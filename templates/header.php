@@ -19,19 +19,31 @@ session_start();
 <body>
     <nav class="navbar">
         <div class="head">
-            <a href="index.php" class="logo">
-                <img src="/templates/icons/CodeVerse.png" alt="CodeVerse Logo" class="logo-image">
-                CodeVerse
-            </a>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="dashboard.php" class="logo">
+                    <img src="/templates/icons/CodeVerse.png" alt="CodeVerse Logo" class="logo-image">
+                    CodeVerse
+                </a>
+            <?php else: ?>
+                <li><a href="login.php">Login</a></li>
+                <li><a href="register.php">Register</a></li>
+            <?php endif; ?>
             <ul class="nav-links">
-                <li><a href="dashboard.php"><img src="/templates/icons/Home.png" alt="CodeVerse Logo" class="icons-image"></a></li>
-                <li><a href="discussions.php"><img src="/templates/icons/Discussion.png" alt="CodeVerse Logo" class="icons-image"></a></li>
-                <li><a href="questions.php"><img src="/templates/icons/question.png" alt="CodeVerse Logo" class="icons-image"></a></li>
-                <li><a href="tech-jobs.php"><img src="/templates/icons/jobs.png" alt="CodeVerse Logo" class="icons-image"></a></li>
-                <li><a href="teams.php"><img src="/templates/icons/Teams.png" alt="CodeVerse Logo" class="icons-image"></a></li>
+                <li><a href="dashboard.php"><img src="/templates/icons/Home.png" alt="CodeVerse Logo"
+                            class="icons-image"></a></li>
+                <li><a href="discussions.php"><img src="/templates/icons/Discussion.png" alt="CodeVerse Logo"
+                            class="icons-image"></a></li>
+                <li><a href="questions.php"><img src="/templates/icons/question.png" alt="CodeVerse Logo"
+                            class="icons-image"></a></li>
+                <li><a href="tech-jobs.php"><img src="/templates/icons/jobs.png" alt="CodeVerse Logo"
+                            class="icons-image"></a></li>
+                <li><a href="teams.php"><img src="/templates/icons/Teams.png" alt="CodeVerse Logo"
+                            class="icons-image"></a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="notifications.php"><img src="/templates/icons/notifications.png" alt="CodeVerse Logo" class="icons-image"></a></li>
-                    <li><a href="private-messaging.php"><img src="/templates/icons/chat.png" alt="CodeVerse Logo" class="icons-image"></a></li>
+                    <li><a href="notifications.php"><img src="/templates/icons/notifications.png" alt="CodeVerse Logo"
+                                class="icons-image"></a></li>
+                    <li><a href="private-messaging.php"><img src="/templates/icons/chat.png" alt="CodeVerse Logo"
+                                class="icons-image"></a></li>
                     <li class="dropdown">
                         <button class="dropdown-btn">
                             <span class="user-name"><?= $_SESSION['user_name']; ?></span>
