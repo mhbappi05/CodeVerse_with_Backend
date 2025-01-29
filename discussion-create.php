@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <body>
     <!--Header-->
-    <header class="discussion-header">
+    <header class="dashboard-header">
         <div class="container">
             <h1>Add a New Discussion</h1>
         </div>

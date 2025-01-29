@@ -27,7 +27,7 @@ $result = $conn->query($query);
 ?>
 
 <!--Header-->
-<header class="discussion-header">
+<header class="dashboard-header">
     <div class="container">
         <h1>Find Your Next Tech Job</h1>
     </div>

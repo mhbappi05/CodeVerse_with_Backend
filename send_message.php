@@ -1,4 +1,8 @@
 <?php
+header('Content-Type: application/json');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 include 'db.php';
 session_start();
 
@@ -43,17 +47,49 @@ if ($sender_id <= 0 || $receiver_id <= 0) {
     exit;
 }
 
-try {
-    // Insert message
-    $query = "INSERT INTO messages (sender_id, receiver_id, message, file_path) VALUES (?, ?, ?, ?)";
-    $stmt = $conn->prepare($query);
+// Check if a file was uploaded
+if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+    $uploadDir = '../uploads/'; // Make sure this directory exists and is writable
     
-    if (!$stmt) {
-        throw new Exception("Prepare failed: " . $conn->error);
+    // Create uploads directory if it doesn't exist
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
     }
-    
-    $stmt->bind_param("iiss", $sender_id, $receiver_id, $message, $file_path);
-    
+
+    // Generate unique filename
+    $fileName = time() . '_' . basename($_FILES['file']['name']);
+    $filePath = $uploadDir . $fileName;
+    $fileType = $_FILES['file']['type'];
+    $fileSize = $_FILES['file']['size'];
+
+    // Move uploaded file
+    if (move_uploaded_file($_FILES['file']['tmp_name'], $filePath)) {
+        $query = "INSERT INTO messages (sender_id, receiver_id, message, file_path, file_name, file_type, file_size) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("iissssi", 
+            $sender_id, 
+            $receiver_id, 
+            $message,
+            $filePath,
+            $fileName,
+            $fileType,
+            $fileSize
+        );
+    } else {
+        http_response_code(500);
+        echo json_encode(['error' => 'Failed to upload file']);
+        exit;
+    }
+} else {
+    // Regular message without file
+    $query = "INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("iis", $sender_id, $receiver_id, $message);
+}
+
+try {
     if (!$stmt->execute()) {
         throw new Exception("Execute failed: " . $stmt->error);
     }
@@ -79,3 +115,13 @@ try {
     $conn->close();
 }
 ?>
+
+<style>
+#file-input {
+    margin: 10px 0;
+}
+</style>
+
+<button id="attach-file-button">
+    <i class="fas fa-paperclip"></i> <!-- If using Font Awesome -->
+</button>

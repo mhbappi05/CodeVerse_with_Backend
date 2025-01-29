@@ -21,7 +21,7 @@ if (!$result) {
 ?>
 
 <!--Header-->
-<header class="discussion-header">
+<header class="dashboard-header">
     <div class="container">
         <h1>Pinned Posts</h1>
     </div>

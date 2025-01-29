@@ -123,25 +123,27 @@ $answers = $answers_stmt->get_result();
 ?>
 
 <!-- HTML Section -->
-<header class="discussion-header">
+<header class="dashboard-header">
     <div class="container">
         <h1>Question Details</h1>
     </div>
 </header>
 
-<div class="question-details-container">
-    <button class="button">
+<div class="thread-container">
+    <button id="create-thread-btn">
         <a href="questionPost.php" style="text-decoration: none; color: white;">Ask your Questions!</a>
     </button>
-    <button class="button" onclick="window.location.href = 'questions.php';">Back</button>
+    <button id="create-thread-btn" onclick="window.location.href = 'questions.php';">Back</button>
+    
     <hr>
-    <div class="question-content">
+
+    <div class="thread-card">
         <h1><?= htmlspecialchars($question['title']); ?></h1>
         <div class="question-meta">
             <span>Asked by: <strong><?= htmlspecialchars($question['name']); ?></strong></span> |
             <span>Posted on: <strong><?= date('M d, Y', strtotime($question['created_at'])); ?></strong></span>
         </div>
-        <p class="question-description">
+        <p class="thread-description">
             <?= nl2br(htmlspecialchars($question['description'])); ?>
         </p>
         <div class="question-tags">

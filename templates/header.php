@@ -11,21 +11,27 @@ session_start();
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/dropdown-menu.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
     <nav class="navbar">
-        <div class="container">
-            <a href="index.php" class="logo">CodeVerse</a>
+        <div class="head">
+            <a href="index.php" class="logo">
+                <img src="/templates/icons/CodeVerse.png" alt="CodeVerse Logo" class="logo-image">
+                CodeVerse
+            </a>
             <ul class="nav-links">
-                <li><a href="dashboard.php">Home</a></li>
-                <li><a href="discussions.php">Discussion</a></li>
-                <li><a href="questions.php">Questions</a></li>
-                <li><a href="tech-jobs.php">Jobs</a></li>
-                <li><a href="teams.php">Teams</a></li>
+                <li><a href="dashboard.php"><img src="/templates/icons/Home.png" alt="CodeVerse Logo" class="icons-image"></a></li>
+                <li><a href="discussions.php"><img src="/templates/icons/Discussion.png" alt="CodeVerse Logo" class="icons-image"></a></li>
+                <li><a href="questions.php"><img src="/templates/icons/question.png" alt="CodeVerse Logo" class="icons-image"></a></li>
+                <li><a href="tech-jobs.php"><img src="/templates/icons/jobs.png" alt="CodeVerse Logo" class="icons-image"></a></li>
+                <li><a href="teams.php"><img src="/templates/icons/Teams.png" alt="CodeVerse Logo" class="icons-image"></a></li>
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><a href="notifications.php">Notifications</a></li>
-                    <li><a href="private-messaging.php">Messages</a></li>
+                    <li><a href="notifications.php"><img src="/templates/icons/notifications.png" alt="CodeVerse Logo" class="icons-image"></a></li>
+                    <li><a href="private-messaging.php"><img src="/templates/icons/chat.png" alt="CodeVerse Logo" class="icons-image"></a></li>
                     <li class="dropdown">
                         <button class="dropdown-btn">
                             <span class="user-name"><?= $_SESSION['user_name']; ?></span>

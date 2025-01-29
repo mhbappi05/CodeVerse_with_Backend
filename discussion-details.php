@@ -59,7 +59,7 @@ $replies = $replies_stmt->get_result();
 ?>
 
 <!--Header-->
-<header class="discussion-header">
+<header class="dashboard-header">
     <div class="container">
         <h1>Discussions Details</h1>
     </div>
@@ -67,10 +67,10 @@ $replies = $replies_stmt->get_result();
 
 <!-- Thread Details Section -->
 <div class="thread-container">
-    <button class="button">
+    <button id="create-thread-btn">
         <a href="discussion-create.php" style="text-decoration: none; color: white;">+ Add a New Discussion</a>
     </button>
-    <button class="button" onclick="window.location.href = 'discussions.php';">Back</button>
+    <button id="create-thread-btn" onclick="window.location.href = 'discussions.php';">Back</button>
 
     <hr>
 

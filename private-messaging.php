@@ -15,7 +15,7 @@ if (!isset($_SESSION['user_id'])) {
 </script>
 
 <!--Header-->
-<header class="discussion-header">
+<header class="dashboard-header">
     <div class="container">
         <h1>Messages</h1>
     </div>
@@ -437,6 +437,19 @@ if (!isset($_SESSION['user_id'])) {
         color: #007bff;
         text-decoration: none;
     }
+
+    .error-message {
+        color: red;
+        text-align: center;
+        padding: 10px;
+        margin: 10px;
+    }
+
+    .message-time {
+        font-size: 0.8em;
+        opacity: 0.7;
+        margin-top: 4px;
+    }
 </style>
 
 <!-- Add your JavaScript -->
@@ -510,18 +523,41 @@ if (!isset($_SESSION['user_id'])) {
 
         function loadMessages(receiverId) {
             fetch(`get_messages.php?receiver_id=${receiverId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(messages => {
+                    if (!Array.isArray(messages)) {
+                        throw new Error('Invalid response format: expected an array');
+                    }
                     chatMessages.innerHTML = '';
                     messages.forEach(msg => {
                         const messageDiv = document.createElement('div');
                         messageDiv.className = `message ${msg.sender_id == currentUserId ? 'sent' : 'received'}`;
-                        messageDiv.textContent = msg.message;
+                        // Add message timestamp and sanitize message content
+                        const messageContent = document.createElement('div');
+                        messageContent.textContent = msg.message; // This safely escapes HTML
+                        messageDiv.appendChild(messageContent);
+                        
+                        // Add timestamp if available
+                        if (msg.timestamp) {
+                            const timeDiv = document.createElement('div');
+                            timeDiv.className = 'message-time';
+                            timeDiv.textContent = new Date(msg.timestamp).toLocaleTimeString();
+                            messageDiv.appendChild(timeDiv);
+                        }
+                        
                         chatMessages.appendChild(messageDiv);
                     });
                     chatMessages.scrollTop = chatMessages.scrollHeight;
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error loading messages:', error);
+                    chatMessages.innerHTML = `<div class="error-message">Error loading messages: ${error.message}</div>`;
+                });
         }
 
         // Auto-refresh messages every 5 seconds

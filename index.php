@@ -14,8 +14,11 @@ include 'db.php';
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
-        <div class="container">
-            <a href="index.php" class="logo">CodeVerse</a>
+        <div class="head">
+            <a href="index.php" class="logo">
+                <img src="/templates/icons/CodeVerse.png" alt="CodeVerse Logo" class="logo-image">
+                CodeVerse
+            </a>
             <ul class="nav-links">
                 <li><a href="#">Home</a></li>
                 <li><a href="#features">Features</a></li>
@@ -26,7 +29,7 @@ include 'db.php';
     </nav>
 
     <!-- Hero Section -->
-    <header class="hero">
+    <header class="dashboard-header">
         <div class="container">
             <h1>Collaborate, Code, Conquer!</h1>
             <p>Ask questions, join teams, and grow your career in tech.</p>

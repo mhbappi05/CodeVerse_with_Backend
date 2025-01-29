@@ -22,16 +22,16 @@ if (!$result) {
 ?>
 
 <!-- Header -->
-<header class="discussion-header">
+<header class="dashboard-header">
     <div class="container">
         <h1>Questions</h1>
     </div>
 </header>
 
 <!-- Question List Section -->
-<div class="discussion-page">
+<div class="dashboard-page">
     <div class="container">
-        <button class="button">
+        <button id="create-thread-btn">
             <a href="questionPost.php" style="text-decoration: none; color: white;">Ask your Questions!</a>
         </button>
         <hr>
@@ -55,7 +55,7 @@ if (!$result) {
                             <?php endforeach; ?>
                         </div>
                         <p></p>
-                        <button class="button">
+                        <button class="btn-secondary">
                             <a href="questions-details.php?id=<?= $row['id']; ?>" style="text-decoration: none; color: white;">
                                 View Questions
                             </a>

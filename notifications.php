@@ -1,96 +1,217 @@
 <?php
+include 'db.php';
 include 'templates/header.php';
-include 'db.php'; // Make sure to include your database connection file
-
-// Check if the user is logged in
-if (!isset($_SESSION['user_id'])) {
-  die("User not logged in.");
-}
-
-$user_id = $_SESSION['user_id']; // Get logged-in user's ID
-
-// Fetch notifications for the logged-in user
-$query = "SELECT * FROM notifications WHERE user_id = $user_id ORDER BY timestamp DESC";
-$result = mysqli_query($conn, $query);
-
-// Check if the query executed successfully
-if (!$result) {
-  die("Error executing query: " . mysqli_error($conn));
-}
-
-// Fetch the notifications as an associative array
-$notifications = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-// Function to convert timestamp to "time ago" format
-function time_ago($timestamp)
-{
-  $time_difference = time() - strtotime($timestamp);
-  $seconds = $time_difference;
-
-  if ($seconds <= 60) {
-    return "Just now";
-  } else if ($seconds <= 3600) {
-    return round($seconds / 60) . " minutes ago";
-  } else if ($seconds <= 86400) {
-    return round($seconds / 3600) . " hours ago";
-  } else {
-    return round($seconds / 86400) . " days ago";
-  }
-}
 ?>
+<!DOCTYPE html>
+<html lang="en">
 
-<!-- Header -->
-<header class="discussion-header">
-  <div class="container">
-    <h1>Your Notifications</h1>
-  </div>
-</header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dropdown-menu.css">
+  <style>
+    .notification-item.unread {
+        background-color: #f0f7ff;
+        border-left: 3px solid #0066cc;
+    }
+  </style>
+</head>
 
-<!-- Notifications Content -->
-<main class="notifications-page">
-  <div class="container">
-    <ul class="notifications-list">
-      <?php if (empty($notifications)): ?>
-        <li class="notification-item">No notifications available.</li>
-      <?php else: ?>
-        <?php foreach ($notifications as $notification): ?>
-          <li class="notification-item">
-            <p>
-              <strong><?php echo htmlspecialchars($notification['sender_id']); ?></strong>
-              <?php
-              // Display the message based on action type
-              switch ($notification['action_type']) {
-                case 'reply':
-                  echo "replied to your thread.";
-                  break;
-                case 'answer':
-                  echo "answered your question.";
-                  break;
-                case 'upvote':
-                  echo "upvoted your answer.";
-                  break;
-                case 'downvote':
-                  echo "downvoted your answer.";
-                  break;
-                case 'join_team':
-                  echo "joined your team.";
-                  break;
-                case 'message':
-                  echo "sent you a message.";
-                  break;
-                default:
-                  echo "performed an action.";
-                  break;
-              }
-              ?>
-            </p>
-            <span class="timestamp"><?php echo time_ago($notification['timestamp']); ?></span>
-            <a href="mark_as_read.php?id=<?php echo $notification['id']; ?>" class="mark-as-read">Mark as Read</a>
-          </li>
-        <?php endforeach; ?>
-      <?php endif; ?>
-    </ul>
-  </div>
-</main>
+<body>
+  <!--Header-->
+  <header class="dashboard-header">
+    <div class="container">
+      <h1>Your Notifications</h1>
+    </div>
+  </header>
 
-<?php include 'templates/footer.php'; ?>
+  <!-- Notifications Content -->
+  <main class="notifications-page">
+    <div class="container">
+      <ul class="notifications-list">
+        <?php
+        // Database connection
+        require_once 'db.php';
+        
+        if (!isset($_SESSION['user_id'])) {
+            // Redirect to login if user is not logged in
+            header('Location: login.php');
+            exit();
+        }
+
+        $user_id = $_SESSION['user_id'];
+
+        // Function to create a notification
+        function createNotification($conn, $receiver_id, $sender_id, $type, $content_id, $action = null) {
+            $query = "INSERT INTO notifications (receiver_id, sender_id, type, content_id, action, is_read) 
+                      VALUES (?, ?, ?, ?, ?, 0)";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("iisis", $receiver_id, $sender_id, $type, $content_id, $action);
+            return $stmt->execute();
+        }
+
+        // Function to get random user ID (for testing)
+        function getRandomUser($conn, $exclude_id) {
+            $query = "SELECT id FROM users WHERE id != ? ORDER BY RAND() LIMIT 1";
+            $stmt = $conn->prepare($query);
+            $stmt->bind_param("i", $exclude_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            return $result->fetch_assoc()['id'] ?? null;
+        }
+
+        // Create a new test notification every time the page is loaded (for testing)
+        $random_user = getRandomUser($conn, $user_id);
+        if ($random_user) {
+            $notification_types = [
+                ['type' => 'answer', 'action' => null],
+                ['type' => 'vote', 'action' => 'upvote'],
+                ['type' => 'team_join', 'action' => null]
+            ];
+            
+            $random_type = $notification_types[array_rand($notification_types)];
+            createNotification($conn, $user_id, $random_user, $random_type['type'], 1, $random_type['action']);
+        }
+
+        // Fetch notifications with actual user information
+        $query = "SELECT n.*, 
+                  CASE 
+                    WHEN u.role = 'admin' THEN 'Admin'
+                    ELSE u.name 
+                  END as sender_name,
+                  n.created_at
+                  FROM notifications n
+                  LEFT JOIN users u ON n.sender_id = u.id
+                  WHERE n.receiver_id = ?
+                  ORDER BY n.created_at DESC
+                  LIMIT 10";
+
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $notification_text = '';
+                $time_ago = time_elapsed_string($row['created_at']);
+                $sender_name = $row['sender_name'] ?? 'Someone';
+                
+                switch ($row['type']) {
+                    case 'answer':
+                        $notification_text = "<strong>{$sender_name}</strong> answered your question";
+                        break;
+                    case 'vote':
+                        $vote_type = $row['action'] == 'upvote' ? 'upvoted' : 'downvoted';
+                        $notification_text = "<strong>{$sender_name}</strong> {$vote_type} your post";
+                        break;
+                    case 'team_join':
+                        $notification_text = "<strong>{$sender_name}</strong> wants to join your team";
+                        break;
+                }
+                ?>
+                <li class="notification-item <?php echo !$row['is_read'] ? 'unread' : ''; ?>" 
+                    data-notification-id="<?php echo $row['id']; ?>">
+                    <div class="notification-content">
+                        <p><?php echo $notification_text; ?></p>
+                        <span class="timestamp"><?php echo $time_ago; ?></span>
+                    </div>
+                </li>
+                <?php
+            }
+        } else {
+            ?>
+            <li class="notification-item">
+                <div class="notification-content">
+                    <p>No notifications yet!</p>
+                </div>
+            </li>
+            <?php
+        }
+
+        function time_elapsed_string($datetime) {
+            $now = new DateTime;
+            $ago = new DateTime($datetime);
+            $diff = $now->diff($ago);
+
+            if ($diff->d == 0) {
+                if ($diff->h == 0) {
+                    if ($diff->i == 0) {
+                        return "Just now";
+                    }
+                    return $diff->i . " minutes ago";
+                }
+                return $diff->h . " hours ago";
+            }
+            if ($diff->d == 1) {
+                return "Yesterday";
+            }
+            return $diff->d . " days ago";
+        }
+        ?>
+      </ul>
+    </div>
+  </main>
+
+  <!-- Add JavaScript to mark notifications as read when clicked -->
+  <script>
+  document.querySelectorAll('.notification-item').forEach(item => {
+      item.addEventListener('click', function() {
+          const notificationId = this.dataset.notificationId;
+          if (notificationId) {
+              fetch('mark_notification_read.php', {
+                  method: 'POST',
+                  body: JSON.stringify({ notification_id: notificationId }),
+                  headers: {
+                      'Content-Type': 'application/json'
+                  }
+              });
+              this.classList.remove('unread');
+          }
+      });
+  });
+  </script>
+
+  <!-- Add custom styles -->
+  <style>
+    .notification-item {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .notification-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .notification-item.unread {
+        background-color: #f0f7ff;
+        border-left: 3px solid #0066cc;
+    }
+    
+    .notification-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    
+    .notification-content p {
+        margin: 0;
+        flex-grow: 1;
+    }
+    
+    .timestamp {
+        color: #6c757d;
+        font-size: 0.85em;
+        white-space: nowrap;
+        margin-left: 15px;
+    }
+  </style>
+</body>
+
+</html>
+  
+  <?php include 'templates/footer.php'; ?>

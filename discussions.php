@@ -12,7 +12,7 @@ $result = $conn->query($sql);
 ?>
 
 <!--Header-->
-<header class="discussion-header">
+<header class="dashboard-header">
     <div class="container">
         <h1>Discussion Forum</h1>
     </div>
@@ -21,7 +21,7 @@ $result = $conn->query($sql);
 <!-- Discussion Forum Content -->
 <main class="discussion-page">
     <div class="container">
-        <button class="button">
+        <button id="create-thread-btn">
             <a href="discussion-create.php" style="text-decoration: none; color: white;">+ Add a New Discussion</a>
         </button>
         <hr>
@@ -36,7 +36,7 @@ $result = $conn->query($sql);
                             Started by: <strong><?= htmlspecialchars($row['created_by']); ?></strong> | 
                             Replies: <?= $row['replies_count']; ?>
                         </p>
-                        <button class="button">
+                        <button class="btn-secondary">
                             <a href="discussion-details.php?id=<?= $row['id']; ?>" style="text-decoration: none; color: white;">
                                 View Thread
                             </a>

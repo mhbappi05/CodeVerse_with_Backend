@@ -75,7 +75,7 @@ if ($result === false) {
 ?>
 
 <!-- Header Section -->
-<header class="discussion-header">
+<header class="dashboard-header">
     <div class="container">
         <h1>Explore Teams & Groups</h1>
     </div>
@@ -99,7 +99,7 @@ if ($result === false) {
                 <!-- Pass team_id to join the team -->
                 <form action="teams.php" method="POST">
                     <input type="hidden" name="team_id" value="<?= $team['id']; ?>">
-                    <button type="submit" class="btn btn-secondary">Join Team</button>
+                    <button type="submit" class="btn-secondary">Join Team</button>
                 </form>
             </div>
         <?php endwhile; ?>

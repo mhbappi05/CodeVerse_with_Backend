@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <body>
     <!--Header-->
-    <header class="discussion-header">
+    <header class="dashboard-header">
         <div class="container">
             <h1>Ask a Programming Question</h1>
         </div>
