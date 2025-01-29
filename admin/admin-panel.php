@@ -83,7 +83,7 @@ $users = $conn->query("SELECT * FROM users");
 
         .navbar {
             background-color: var(--primary-color);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 1rem 0;
         }
 
@@ -115,7 +115,7 @@ $users = $conn->query("SELECT * FROM users");
             background-color: var(--card-color);
             border-radius: 8px;
             padding: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
         }
 
@@ -137,7 +137,7 @@ $users = $conn->query("SELECT * FROM users");
         .admin-table {
             background-color: var(--card-color);
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
 
@@ -191,7 +191,10 @@ $users = $conn->query("SELECT * FROM users");
 <body>
     <nav class="navbar">
         <div class="container">
-            <a href="#" class="logo">CollabConnect Admin</a>
+            <a class="logo" style=" justify-content: center; " >
+                <img src="/templates/icons/CodeVerse.png" alt="CodeVerse Logo" class="logo-image">
+                CodeVerse
+            </a>
             <ul class="nav-links">
                 <li><a href="#dashboard">Dashboard</a></li>
                 <li><a href="#dismoderation">Discussions Moderation</a></li>
